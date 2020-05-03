@@ -1,68 +1,153 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+Steps to implement Redux:-
 
-In the project directory, you can run:
+1. Install library as:-
+npm install react-redux redux redux-thunk
 
-### `yarn start`
+Redux is nothing special. It is just the way to perform certain actions depending on the action type. It is done by the switch case statement.  To do so we have to define action type and action payload (or data). 
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+2. Define the action type in a file type.js:-
+export const type = {
+GET_POSTS: 'getPosts'
+};
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+3. Define the switch statement for post in postReducer.js :-
 
-### `yarn test`
+import {types} from '../action/type'
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+export default (state=[], action) => {
+switch(action.type){
+case types.GET_POSTS:
+return action.payload;
+default:
+return state;
+}
+}
 
-### `yarn build`
+4. Define actual reducer as:-
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+import {combineReducers} from 'redux';
+import postReducer from './posts/postReducer';
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+export default combineReducers({
+postReducer
+})
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### `yarn eject`
+4. Define the action. For this example, I am using axios to perform REST get to fetch data from a server. npm install axios  It can be some other type of action where axios is not required. I define action.js:-
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+import { types } from './types';
+import axios from 'axios';
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+export const fetchPosts = () => async (dispatch) => {
+await axios.get('https://jsonplaceholder.typicode.com/posts?_limit=10')
+.then(res => {
+dispatch({
+type: types.GET_POSTS,
+payload: res.data
+})
+})
+.catch(err => {
+console.log(err);
+})
+};
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+5. Redux is a state container for JavaScript apps, often called a Redux store. It stores the whole state of the app in an immutable object tree. We have to define store in createStore.js :-
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+import { createStore, applyMiddleware } from 'redux';
+import ReduxThunk from 'redux-thunk';
+import RootReducer from './reducer';
 
-## Learn More
+export const middlewares = [ReduxThunk];
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+export const createStoreWithMiddleware = applyMiddleware(...middlewares)(createStore)
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+export const store = createStoreWithMiddleware(RootReducer)
 
-### Code Splitting
+6. We have defined our redux. But it is not used anywhere yet. We have to use redux in our app. 
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+import React, { Component } from 'react'
+import { connect } from 'react-redux';
+import {fetchPosts} from './reducers/action/action'
+import ListItem from './component/ListItem'
 
-### Analyzing the Bundle Size
+export class App extends Component {
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+constructor(props){
+super(props);
+this.fetch = this.fetch.bind(this);
+}
 
-### Making a Progressive Web App
+fetch(){
+this.props.fetchPosts();
+}
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+render() {
+const { postReducer } = this.props;
+return (
+<div>
+<button onClick={() => this.fetch()}>Get Post</button>
+{
+postReducer.length > 0 &&
+<div>
+{
+postReducer.map((post, index) => {
+const { title, body } = post;
 
-### Advanced Configuration
+const configListItem = {
+title,
+desc: body
+};
+return (
+<ListItem key={index} {...configListItem} />
+)
+})}
+</div>
+}
+</div>
+)
+}
+}
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
+const mapStateToProps = state => {
+return {
+postReducer: state.postReducer
+}
+}
 
-### Deployment
+export default connect(mapStateToProps, {fetchPosts})(App); // main connect part here.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
 
-### `yarn build` fails to minify
+7. When we render App in the index.js we have to wrap App with provider and store as follows:-
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+import React from 'react';
+import ReactDOM from 'react-dom';
+import {Provider} from 'react-redux';
+import {store} from './reducers/createStore'
+import './index.css';
+import App from './App';
+
+ReactDOM.render(
+<Provider store={store}>
+<App />
+</Provider>
+, document.getElementById('root')
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
