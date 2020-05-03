@@ -1,30 +1,30 @@
 
 Steps to implement Redux:-
 
-1. Install library as:-
+### 1. Install library as:-
 npm install react-redux redux redux-thunk
 
 Redux is nothing special. It is just the way to perform certain actions depending on the action type. It is done by the switch case statement.  To do so we have to define action type and action payload (or data). 
 
-2. Define the action type in a file type.js:-
+### 2. Define the action type in a file type.js:-  
 export const type = {
 GET_POSTS: 'getPosts'
 };
 
-3. Define the switch statement for post in postReducer.js :-
+### 3. Define the switch statement for post in postReducer.js :-
 
 import {types} from '../action/type'
 
-export default (state=[], action) => {
-switch(action.type){
-case types.GET_POSTS:
-return action.payload;
-default:
-return state;
-}
+export default (state=[], action) => {  
+switch(action.type){  
+case types.GET_POSTS:  
+return action.payload;  
+default:  
+return state;  
+  }
 }
 
-4. Define actual reducer as:-
+### 4. Define actual reducer as:-
 
 import {combineReducers} from 'redux';
 import postReducer from './posts/postReducer';
@@ -34,7 +34,7 @@ postReducer
 })
 
 
-4. Define the action. For this example, I am using axios to perform REST get to fetch data from a server. npm install axios  It can be some other type of action where axios is not required. I define action.js:-
+### 5. Define the action. For this example, I am using axios to perform REST get to fetch data from a server. npm install axios  It can be some other type of action where axios is not required. I define action.js:-
 
 import { types } from './types';
 import axios from 'axios';
@@ -52,7 +52,7 @@ console.log(err);
 })
 };
 
-5. Redux is a state container for JavaScript apps, often called a Redux store. It stores the whole state of the app in an immutable object tree. We have to define store in createStore.js :-
+### 6. Redux is a state container for JavaScript apps, often called a Redux store. It stores the whole state of the app in an immutable object tree. We have to define store in createStore.js :-
 
 import { createStore, applyMiddleware } from 'redux';
 import ReduxThunk from 'redux-thunk';
@@ -64,7 +64,7 @@ export const createStoreWithMiddleware = applyMiddleware(...middlewares)(createS
 
 export const store = createStoreWithMiddleware(RootReducer)
 
-6. We have defined our redux. But it is not used anywhere yet. We have to use redux in our app. 
+### 7. We have defined our redux. But it is not used anywhere yet. We have to use redux in our app. 
 
 import React, { Component } from 'react'
 import { connect } from 'react-redux';
@@ -118,7 +118,7 @@ postReducer: state.postReducer
 export default connect(mapStateToProps, {fetchPosts})(App); // main connect part here.
 
 
-7. When we render App in the index.js we have to wrap App with provider and store as follows:-
+### 8. When we render App in the index.js we have to wrap App with provider and store as follows:-
 
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -133,18 +133,6 @@ ReactDOM.render(
 </Provider>
 , document.getElementById('root')
 );
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
